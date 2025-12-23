@@ -5,16 +5,27 @@ import Gallery from './Gallery';
 import LoveTree from './LoveTree';
 import { Heart, Gift, Sparkles } from 'lucide-react';
 
-// Typewriter Component for the "Wipe" effect
-const TypewriterText: React.FC<{ text: string; delay?: number; className?: string }> = ({ text, delay = 0, className = "" }) => {
-  const words = text.split(" ");
+// Unified RevealText Component
+const RevealText: React.FC<{ messages: string[]; delay?: number; className?: string }> = ({ messages, delay = 0, className = "" }) => {
+  // Flatten messages into a sequence of words and breaks
+  const sequence: ({ type: 'word', text: string } | { type: 'break' })[] = [];
+
+  messages.forEach((msg, index) => {
+    msg.split(" ").forEach(word => {
+        if (word) sequence.push({ type: 'word', text: word });
+    });
+    // Add paragraph break
+    if (index < messages.length - 1) {
+        sequence.push({ type: 'break' });
+    }
+  });
 
   const container: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.04, // Speed of typing
+        staggerChildren: 0.08, 
         delayChildren: delay,
       },
     },
@@ -23,19 +34,16 @@ const TypewriterText: React.FC<{ text: string; delay?: number; className?: strin
   const child: Variants = {
     hidden: { 
         opacity: 0, 
-        y: 10, 
-        rotateX: -45,
-        filter: "blur(4px)" 
+        y: 15, 
+        filter: "blur(5px)" 
     },
     visible: {
       opacity: 1,
       y: 0,
-      rotateX: 0,
       filter: "blur(0px)",
       transition: {
-        type: "spring",
-        damping: 12,
-        stiffness: 100,
+        duration: 0.6,
+        ease: "easeOut",
       },
     },
   };
@@ -48,15 +56,20 @@ const TypewriterText: React.FC<{ text: string; delay?: number; className?: strin
       viewport={{ once: true, margin: "-10%" }}
       className={`flex flex-wrap ${className}`}
     >
-      {words.map((word, i) => (
-        <div key={i} className="flex mr-1.5 mb-1 overflow-hidden">
-          {word.split("").map((char, j) => (
-            <motion.span key={j} variants={child} className="inline-block">
-              {char}
+      {sequence.map((item, i) => {
+        if (item.type === 'break') {
+            return <div key={`break-${i}`} className="basis-full h-6" />; 
+        }
+        return (
+            <motion.span 
+                key={i} 
+                variants={child} 
+                className="mr-1.5 mb-1 inline-block"
+            >
+                {item.text}
             </motion.span>
-          ))}
-        </div>
-      ))}
+        );
+      })}
     </motion.div>
   );
 };
@@ -128,6 +141,12 @@ const BirthdayReveal: React.FC = () => {
     fire(0.1, { spread: 120, startVelocity: 45, colors: ['#ffc0cb'] });
   };
 
+  const birthdayMessages = [
+    "I just wanted to tell you how much you mean to me. I’m honestly so grateful to have you in my life. You make everything feel lighter and happier just by being you.",
+    "I love you so much, and I truly appreciate every little moment we share. You matter to me more than I can explain, and I feel lucky every day knowing you’re mine.",
+    "I hope today brings you lots of smiles, love, and happiness — because that’s exactly what you deserve."
+  ];
+
   return (
     <div ref={containerRef} className="h-full w-full relative z-10 overflow-y-auto scroll-smooth perspective-1000">
         
@@ -182,25 +201,18 @@ const BirthdayReveal: React.FC = () => {
                <Heart className="text-rose-400 fill-rose-200 animate-pulse" size={40} />
             </div>
             
-            <div className="min-h-[300px] text-lg md:text-xl text-gray-700 leading-relaxed font-light mb-8 text-left space-y-6">
-              <TypewriterText 
-                text="I just wanted to tell you how much you mean to me. I’m honestly so grateful to have you in my life. You make everything feel lighter and happier just by being you." 
-                delay={0.2}
-              />
-              <TypewriterText 
-                text="I love you so much, and I truly appreciate every little moment we share. You matter to me more than I can explain, and I feel lucky every day knowing you’re mine." 
-                delay={2.5}
-              />
-              <TypewriterText 
-                text="I hope today brings you lots of smiles, love, and happiness — because that’s exactly what you deserve." 
-                delay={5.0}
+            <div className="min-h-[300px] text-lg md:text-xl text-gray-700 leading-relaxed font-light mb-8 text-left">
+              <RevealText 
+                messages={birthdayMessages} 
+                delay={0.5} 
               />
             </div>
             
             <motion.div 
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
-                transition={{ delay: 8, duration: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 6, duration: 1 }}
                 className="text-right text-rose-800 font-semibold script-font text-3xl"
             >
               Always yours,<br/>
