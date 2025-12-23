@@ -7,10 +7,8 @@ import FloatingBackground from './components/FloatingBackground';
 const App: React.FC = () => {
   const [isRevealed, setIsRevealed] = useState(false);
 
-  // Target Date: 1 minute from now (Temporary for testing)
-  // We use a state initializer so the time doesn't reset on re-renders, 
-  // but resets on page refresh.
-  const [targetDate] = useState(() => new Date(Date.now() + 1 * 60 * 1000));
+  // Set target date to December 25, 2025
+  const [targetDate] = useState(new Date('2025-12-25T00:00:00'));
 
   return (
     <div className="relative min-h-screen w-full bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100 animate-gradient overflow-hidden">
